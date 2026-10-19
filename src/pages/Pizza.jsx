@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { formatCurrency } from "../utils/formatCurrency";
+import { useContext, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
+import { CartContext } from "../context/CartContext.jsx";
+import { formatCurrency } from "../utils/formatCurrency.js";
 
 const Pizza = () => {
+  const { id } = useParams();
+  const { addToCart } = useContext(CartContext);
+
   const [pizza, setPizza] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -11,15 +16,21 @@ const Pizza = () => {
     const controller = new AbortController();
 
     const getPizza = async () => {
+      setLoading(true);
+      setError("");
+      setPizza(null);
+
       try {
         const response = await fetch(
-          "http://localhost:5000/api/pizzas/p001",
+          `http://localhost:5000/api/pizzas/${encodeURIComponent(id)}`,
           { signal: controller.signal }
         );
 
         if (!response.ok) {
           throw new Error(
-            `No se pudo cargar la pizza: HTTP ${response.status}`
+            response.status === 404
+              ? "No encontramos esa pizza."
+              : `No se pudo cargar la pizza: HTTP ${response.status}`
           );
         }
 
@@ -41,39 +52,30 @@ const Pizza = () => {
 
     getPizza();
 
-    return () => {
-      controller.abort();
-    };
-  }, []);
+    return () => controller.abort();
+  }, [id]);
 
   if (loading) {
-    return (
-      <main className="container my-5">
-        <p role="status">Cargando pizza...</p>
-      </main>
-    );
+    return <p role="status">Cargando pizza...</p>;
   }
 
   if (error) {
     return (
-      <main className="container my-5">
+      <section className="my-5">
         <p className="alert alert-danger" role="alert">
           {error}
         </p>
-      </main>
+        <Link to="/">Volver al inicio</Link>
+      </section>
     );
   }
 
   if (!pizza) {
-    return (
-      <main className="container my-5">
-        <p>No hay información de la pizza.</p>
-      </main>
-    );
+    return <p>No hay información de la pizza.</p>;
   }
 
   return (
-    <main className="container my-5">
+    <section className="my-5">
       <article className="card">
         <div className="row g-0">
           <div className="col-md-6">
@@ -86,16 +88,14 @@ const Pizza = () => {
 
           <div className="col-md-6">
             <div className="card-body">
-              <h1 className="card-title fw-bold text-capitalize">
+              <h1 className="fw-bold text-capitalize pizza-title">
                 Pizza {pizza.name}
               </h1>
 
-              <p className="card-text">
-                {pizza.desc}
-              </p>
+              <p>{pizza.desc}</p>
 
-              <h2 className="fs-5 mt-4 fw-bold text-dark">
-                 Ingredientes
+              <h2 className="fs-5 mt-4">
+                Ingredientes
               </h2>
 
               <ul>
@@ -113,15 +113,19 @@ const Pizza = () => {
               <button
                 type="button"
                 className="btn btn-dark"
+                onClick={() => addToCart(pizza)}
               >
                 Añadir 🛒
               </button>
+
+              <Link to="/" className="btn btn-link">
+                Volver al inicio
+              </Link>
             </div>
-            <Link to="/">Volver al inicio</Link>
           </div>
         </div>
       </article>
-    </main>
+    </section>
   );
 };
 

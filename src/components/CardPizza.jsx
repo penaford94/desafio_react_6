@@ -1,6 +1,13 @@
-import { formatCurrency } from "../utils/formatCurrency";
+import { useContext } from "react";
+import { Link } from "react-router-dom";
 
-const CardPizza = ({ name, price, ingredients, img, desc}) => {
+import { CartContext } from "../context/CartContext.jsx";
+import { formatCurrency } from "../utils/formatCurrency.js";
+
+const CardPizza = ({ pizza }) => {
+  const { addToCart } = useContext(CartContext);
+  const { id, name, price, ingredients, img } = pizza;
+
   return (
     <article className="card h-100">
       <img
@@ -10,12 +17,15 @@ const CardPizza = ({ name, price, ingredients, img, desc}) => {
       />
 
       <div className="card-body d-flex flex-column">
-        <h2 className="card-title fs-5">Pizza {name}</h2>
-        <p className="card-title fs-5">Descripción: {desc}</p>
+        <h2 className="card-title fs-5 text-capitalize">
+          Pizza {name}
+        </h2>
 
         <hr />
 
-        <p className="text-center text-secondary mb-2">Ingredientes:</p>
+        <p className="text-center text-secondary mb-2">
+          Ingredientes:
+        </p>
 
         <ul className="list-unstyled text-center flex-grow-1">
           {ingredients.map((ingredient) => (
@@ -30,11 +40,18 @@ const CardPizza = ({ name, price, ingredients, img, desc}) => {
         </p>
 
         <div className="d-flex justify-content-between">
-          <button type="button" className="btn btn-outline-dark">
+          <Link
+            to={`/pizza/${id}`}
+            className="btn btn-outline-dark"
+          >
             Ver más 👀
-          </button>
+          </Link>
 
-          <button type="button" className="btn btn-dark">
+          <button
+            type="button"
+            className="btn btn-dark"
+            onClick={() => addToCart(pizza)}
+          >
             Añadir 🛒
           </button>
         </div>

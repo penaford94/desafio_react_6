@@ -68,13 +68,7 @@ const Home = () => {
                 className="col-12 col-md-4"
                 key={pizza.id}
               >
-                <CardPizza
-                  name={pizza.name}
-                  desc={pizza.desc}
-                  price={pizza.price}
-                  ingredients={pizza.ingredients}
-                  img={pizza.img}
-                />
+                <CardPizza pizza={pizza} />
               </div>
             ))}
 
